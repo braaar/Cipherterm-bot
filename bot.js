@@ -36,8 +36,14 @@ var key = [
   ["null", "null", "null", "null", "null"]
 ]
 
+// random int between 0 and (max - 1). If max is 4, will return 0,1,2 or 3
 function getRandomInt(max) {
   return Math.floor(Math.random() * Math.floor(max));
+}
+
+// sleep milliseconds
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 function generateBoard(){
@@ -125,6 +131,7 @@ function drawBoard(word_array, channelID){
       message: string});
 }
 
+// reveals the identity of a guessed word
 function guessWord(word, team, channelID){
   var guess = word.toUpperCase();
   var found = false;
@@ -144,11 +151,11 @@ function guessWord(word, team, channelID){
             break;
           case ":white_circle:":
             board[i][j] = "~~CIVILIAN~~";
-            idString = "a civilian!"
+            idString = "a civilian! :astonished:"
             break;
           case ":black_circle:":
             board[i][j] = "~~ASSASSIN~~";
-            idString = "the assassin!"
+            idString = "the assassin! :dizzy_face:"
             break;
         }
         found = true;
@@ -167,6 +174,7 @@ function guessWord(word, team, channelID){
         to: channelID,
         message: msg
     });
+    sleep(100);
     drawBoard(board, channelID);
   }
 }
@@ -194,7 +202,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
               drawBoard(board, channelID);
             break;
 
-            case ('drawkey' || 'dk'):
+            case 'drawkey':
               drawKey(key, channelID);
             break;
 
