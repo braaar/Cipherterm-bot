@@ -42,11 +42,12 @@ function getRandomInt(max) {
 
 function generateBoard(){
   var newBoard = board.slice();
+  var tempWords = json_words.data.slice();
   for (var i = 0; i < newBoard.length;i++){
     for (var j = 0; j < newBoard[0].length; j++) {
-      rand = getRandomInt(json_words.data.length);
-      newBoard[i][j] = json_words.data[rand];
-      json_words.data.splice(rand, 1);
+      rand = getRandomInt(tempWords.length);
+      newBoard[i][j] = tempWords[rand];
+      tempWords.splice(rand, 1);
     }
   }
   return newBoard;
@@ -54,9 +55,11 @@ function generateBoard(){
 
 function generateKey(){
   var newKey = key.slice();
+
   // [red agents, blue agents, neutrals, assassin]
   var distribution = [9, 8, 7, 1];
   var symbols = [":red_circle:", ":large_blue_circle:", ":white_circle:", ":black_circle:"];
+
   //determine starting team, if this returns true, blue is the starting team
   if(getRandomInt(2)){
     distribution[0] = 8;
@@ -125,6 +128,7 @@ function drawBoard(word_array, channelID){
 function guessWord(word, team, channelID){
   var guess = word.toUpperCase();
   var found = false;
+  var idString;
   console.log(guess);
   for (var i = 0; i < board.length;i++){
     for (var j = 0; j < board[i].length; j++) {
@@ -132,21 +136,23 @@ function guessWord(word, team, channelID){
         switch (key[i][j]) {
           case ":red_circle:":
             board[i][j] = "~~RED AGENT~~";
+            idString = "a red agent!"
             break;
           case ":large_blue_circle:":
-            board[i][j] = "BLUE AGENT";
+            board[i][j] = "~~BLUE AGENT~~";
+            idString = "a blue agent!"
             break;
           case ":white_circle:":
             board[i][j] = "~~CIVILIAN~~";
+            idString = "a civilian!"
             break;
           case ":black_circle:":
             board[i][j] = "~~ASSASSIN~~";
+            idString = "the assassin!"
             break;
         }
         found = true;
-
       }
-
     }
   }
   if (found == false) {
@@ -156,6 +162,11 @@ function guessWord(word, team, channelID){
     });
   }
   else {
+    var msg = "Codename " + guess.toUpperCase() + " is " + idString;
+    bot.sendMessage({
+        to: channelID,
+        message: msg
+    });
     drawBoard(board, channelID);
   }
 }
@@ -173,11 +184,9 @@ bot.on('message', function (user, userID, channelID, message, evt) {
             case 'ping':
                 bot.sendMessage({
                     to: channelID,
-                    message: 'Pong! :thinking:'
-
+                    message: 'Pong! :eggplant:'
                 });
             break;
-            // Just add any case commands if you want to..
 
             case 'startgame':
               board = generateBoard();
@@ -192,15 +201,14 @@ bot.on('message', function (user, userID, channelID, message, evt) {
             case 'draw':
               drawBoard(board, channelID);
             break;
-         }
-         if (cmd.includes("red")){
-           console.log(args);
-           guessWord(args[0], "red", channelID)
 
-         }
-         else if(cmd.includes("blue")){
-           console.log(args);
-           guessWord(args[0], "blue", channelID)
+            case 'red':
+              guessWord(args[0], "red", channelID);
+            break;
+
+            case 'blue':
+              guessWord(args[0], "blue", channelID);
+            break;
          }
      }
 });
